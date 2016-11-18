@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="menu_border_color">#aeaeae</color>
+    <color name="fragment_background_normal">#f1f1f1</color>
+    <color name="group_border_color">#d0d0d0</color>
+    <color name="group_title_color">#777777</color>
+    <color name="date_range_color">#C47A02</color>
+
+    <color name="button_border_color">#aeaeae</color>
+    <color name="button_border_hot">#e35959</color>
+    <color name="button_border_primary">#1ba0b7</color>
+
+    <color name="reset_button_text_color_highlight">#df0b0b</color>
+    <color name="view_button_text_color_highlight">#0d7e92</color>
+
+    <color name="seek_bar_border">#aaaaaa</color>
+
+    <color name="spinner_item_background">#f1f1f1</color>
+    <color name="spinner_item_text">#000</color>
+</resources>
