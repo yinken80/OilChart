@@ -2,11 +2,13 @@ package eu.gosocialdev.rextagpredictions.ui;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
@@ -19,6 +21,7 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
@@ -32,11 +35,17 @@ import java.util.concurrent.TimeUnit;
 
 import eu.gosocialdev.rextagpredictions.R;
 import eu.gosocialdev.rextagpredictions.ui.base.BaseFragment;
+import eu.gosocialdev.rextagpredictions.ui.models.ForecasterItemModel;
 import eu.gosocialdev.rextagpredictions.ui.models.SelectionMenuData;
 import eu.gosocialdev.rextagpredictions.ui.views.OilChartMakerView;
 
-public class ChartFragment extends BaseFragment implements OnChartValueSelectedListener, OnChartGestureListener {
+public class ChartFragment extends BaseFragment implements OnChartValueSelectedListener, OnChartGestureListener, View.OnClickListener {
     private LineChart mChart;
+    private FloatingActionButton mBtnDownload;
+
+    private String[] colors = {"#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5", "#2196f3", "#03a9f4", "#00bcd4",
+                                "#009688", "#4caf50", "#8bc34a", "#cddc39", "#ffeb3b", "#ffc107", "#ff9800", "#ff5722",
+                                "#795548", "#9e9e9e", "#607d8b"};
 
     @Override
     public View onCreateView(LayoutInflater inflater,
@@ -45,6 +54,9 @@ public class ChartFragment extends BaseFragment implements OnChartValueSelectedL
         super.onCreateView(inflater, container, savedInstanceState);
 
         View view = inflater.inflate(R.layout.fragment_chart, container, false);
+
+        mBtnDownload = (FloatingActionButton) view.findViewById(R.id.btnDownload);
+        mBtnDownload.setOnClickListener(this);
 
         mChart = (LineChart) view.findViewById(R.id.chart);
         //enable touch gestures
@@ -66,7 +78,7 @@ public class ChartFragment extends BaseFragment implements OnChartValueSelectedL
         xAxis.setTypeface(mTfLight);
         xAxis.setTextSize(10f);
         xAxis.setTextColor(Color.rgb(255, 192, 56));
-        xAxis.setCenterAxisLabels(true);
+        xAxis.setCenterAxisLabels(false);
         xAxis.setDrawGridLines(false);
         xAxis.setGranularity(1f);
         xAxis.setValueFormatter(new IAxisValueFormatter() {
@@ -132,70 +144,73 @@ public class ChartFragment extends BaseFragment implements OnChartValueSelectedL
     }
 
     public void setData(SelectionMenuData setting, float range) {
-        ArrayList<Entry> values = new ArrayList<Entry>();
-        ArrayList<Entry> values2 = new ArrayList<Entry>();
-
         float from = setting.startDate;
 
         // count = days
         float to = setting.endDate;
 
-        // increment by 1 hour
-        for (float x = from; x < to; x++) {
+        ArrayList<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
 
-            float y = getRandom(range, 50);
-            values.add(new Entry(x, y)); // add one entry per hour
+        ArrayList<ForecasterItemModel> forecasters = setting.forecasters;
+        int colorCount = colors.length;
 
-            y = getRandom(range, 50);
-            values2.add(new Entry(x, y));
+        ArrayList<Entry> values = getRandomValues(from, to, 50);
+        int color = ColorTemplate.getHoloBlue();
+
+        LineDataSet set = new LineDataSet(values, "Actual oil price");
+        set.setAxisDependency(YAxis.AxisDependency.LEFT);
+        set.setColor(color);
+        set.setValueTextColor(color);
+        set.setLineWidth(1.5f);
+        set.setDrawCircles(true);
+        set.setCircleColor(color);
+        set.setDrawValues(false);
+        set.setFillAlpha(65);
+        set.setFillColor(color);
+        set.setHighLightColor(color);
+        set.setDrawCircleHole(true);
+
+        dataSets.add(set);
+
+        for (int i = 0; i < forecasters.size(); i++) {
+            values = getRandomValues(from, to, 50);
+
+            color = ColorTemplate.rgb(colors[i%colorCount]);
+            set = new LineDataSet(values, forecasters.get(i).getText());
+            set.setAxisDependency(YAxis.AxisDependency.LEFT);
+            set.setColor(color);
+            set.setValueTextColor(color);
+            set.setLineWidth(1.5f);
+            set.setDrawCircles(true);
+            set.setCircleColor(color);
+            set.setDrawValues(false);
+            set.setFillAlpha(65);
+            set.setFillColor(color);
+            set.setHighLightColor(color);
+            set.setDrawCircleHole(true);
+
+            dataSets.add(set);
         }
 
         LineData data;
+        mChart.clear();
+        data = new LineData(dataSets);
+        data.setValueTextColor(Color.WHITE);
+        data.setValueTextSize(9f);
+        // set data
+        mChart.setData(data);
+        mChart.animate();
+    }
 
-        if (mChart.getData() != null && mChart.getData().getDataSetCount() > 0) {
-            data = mChart.getData();
-            ((LineDataSet)data.getDataSetByIndex(0)).setValues(values);
-            ((LineDataSet)data.getDataSetByIndex(1)).setValues(values2);
-
-            data.notifyDataChanged();
-            mChart.notifyDataSetChanged();
-            mChart.invalidate();
-        } else {
-            // create a dataset and give it a type
-            LineDataSet set1 = new LineDataSet(values, "Hart Energy Forecaster Index");
-            set1.setAxisDependency(YAxis.AxisDependency.LEFT);
-            set1.setColor(ColorTemplate.getHoloBlue());
-            set1.setValueTextColor(ColorTemplate.getHoloBlue());
-            set1.setLineWidth(1.5f);
-            set1.setDrawCircles(true);
-            set1.setCircleColor(ColorTemplate.getHoloBlue());
-            set1.setDrawValues(false);
-            set1.setFillAlpha(65);
-            set1.setFillColor(ColorTemplate.getHoloBlue());
-            set1.setHighLightColor(Color.rgb(244, 117, 117));
-            set1.setDrawCircleHole(true);
-
-            LineDataSet set2 = new LineDataSet(values2, "ABN AMRO");
-            set2.setAxisDependency(YAxis.AxisDependency.LEFT);
-            set2.setColor(Color.RED);
-            set2.setValueTextColor(Color.RED);
-            set2.setLineWidth(1.5f);
-            set2.setDrawCircles(true);
-            set2.setCircleColor(Color.RED);
-            set2.setDrawValues(false);
-            set2.setFillAlpha(65);
-            set2.setFillColor(Color.RED);
-            set2.setHighLightColor(Color.rgb(244, 117, 117));
-            set2.setDrawCircleHole(true);
-
-            data = new LineData(set1, set2);
-            data.setValueTextColor(Color.WHITE);
-            data.setValueTextSize(9f);
-            // set data
-            mChart.setData(data);
+    private ArrayList<Entry> getRandomValues(float from, float to, float range) {
+        ArrayList<Entry> values = new ArrayList<Entry>();
+        // increment by 1 day
+        for (float x = from; x < to; x++) {
+            float y = getRandom(range, 50);
+            values.add(new Entry(x, y)); // add one entry per hour
         }
 
-        mChart.animate();
+        return values;
     }
 
     @Override
@@ -247,5 +262,21 @@ public class ChartFragment extends BaseFragment implements OnChartValueSelectedL
     @Override
     public void onChartTranslate(MotionEvent me, float dX, float dY) {
 
+    }
+
+    @Override
+    public void onClick(View view) {
+        int btnId = view.getId();
+        switch (btnId) {
+            case R.id.btnDownload:
+            {
+                String filename = "OilChart_" + new Date().toString();
+                boolean bSuccess = mChart.saveToGallery(filename, 100);
+                if (bSuccess) {
+                    Toast.makeText(getContext(), "File saved to the gallery as " + filename +".jpg", Toast.LENGTH_LONG).show();
+                }
+                break;
+            }
+        }
     }
 }

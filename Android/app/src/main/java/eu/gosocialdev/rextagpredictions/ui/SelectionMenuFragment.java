@@ -1,6 +1,7 @@
 package eu.gosocialdev.rextagpredictions.ui;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -42,7 +43,7 @@ public class SelectionMenuFragment extends Fragment implements View.OnClickListe
 
     // property values
     ArrayList<ForecasterItemModel> mForecasters;
-    long            minDate, maxDate;
+    long mMinDate, mMaxDate;
 
     // value containing overall settings
     SelectionMenuData setting;
@@ -155,6 +156,8 @@ public class SelectionMenuFragment extends Fragment implements View.OnClickListe
         updateDateText();
     }
 
+    Handler mHandler = new Handler();
+
     /**
      * Set the listener that listens settings' changes
      */
@@ -165,12 +168,15 @@ public class SelectionMenuFragment extends Fragment implements View.OnClickListe
      * Set the maximum and minimum value of the date range bar
      */
     public void setDateRange(long minDate, long maxDate) {
-        this.minDate = minDate;
-        this.maxDate = maxDate;
+        this.mMinDate = minDate;
+        this.mMaxDate = maxDate;
         mDateRanger.setScaleRangeMin(minDate);
         mDateRanger.setScaleRangeMax(maxDate);
-        mDateRanger.getThumbAt(0).setValue(minDate);
-        mDateRanger.getThumbAt(1).setValue(maxDate);
+        RangeSeekBar.Thumb left = mDateRanger.getThumbAt(0);
+        RangeSeekBar.Thumb right = mDateRanger.getThumbAt(1);
+        left.setValue(minDate);
+        right.setValue(maxDate);
+        mDateRanger.invalidate();
 
         setting.oilType = 0;
         setting.forecasters = mForecasters;
@@ -184,6 +190,7 @@ public class SelectionMenuFragment extends Fragment implements View.OnClickListe
      * Return setting value
      */
     public SelectionMenuData getSetting() {
+        setting.forecasters = ((ForecasterListAdapter)mForecasterListView.getAdapter()).selectedItems();
         return setting;
     }
 
@@ -206,10 +213,10 @@ public class SelectionMenuFragment extends Fragment implements View.OnClickListe
      */
     private void reset() {
         setting.oilType = 0;
-        setting.startDate = minDate;
-        setting.endDate = maxDate;
-        mDateRanger.getThumbAt(0).setValue(minDate);
-        mDateRanger.getThumbAt(1).setValue(maxDate);
+        setting.startDate = mMinDate;
+        setting.endDate = mMaxDate;
+        mDateRanger.getThumbAt(0).setValue(mMinDate);
+        mDateRanger.getThumbAt(1).setValue(mMaxDate);
         if (mListener != null) {
             mListener.onReset(setting);
         }
