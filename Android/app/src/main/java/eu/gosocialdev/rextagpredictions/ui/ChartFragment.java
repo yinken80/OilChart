@@ -1,5 +1,6 @@
 package eu.gosocialdev.rextagpredictions.ui;
 
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -46,6 +47,14 @@ public class ChartFragment extends BaseFragment implements OnChartValueSelectedL
     private String[] colors = {"#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5", "#2196f3", "#03a9f4", "#00bcd4",
                                 "#009688", "#4caf50", "#8bc34a", "#cddc39", "#ffeb3b", "#ffc107", "#ff9800", "#ff5722",
                                 "#795548", "#9e9e9e", "#607d8b"};
+    long mToday;
+    SelectionMenuData setting;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater,
@@ -70,7 +79,7 @@ public class ChartFragment extends BaseFragment implements OnChartValueSelectedL
         mChart.setDrawGridBackground(false);
         mChart.setHighlightPerDragEnabled(true);
 
-        mChart.setPinchZoom(true);
+        mChart.setPinchZoom(false);
 
         // x-axis
         XAxis xAxis = mChart.getXAxis();
@@ -111,9 +120,14 @@ public class ChartFragment extends BaseFragment implements OnChartValueSelectedL
                 return 0;
             }
         });
+        xAxis.setLabelRotationAngle(-45);
+        xAxis.setAvoidFirstLastClipping(true);
 
         // x-axis limit line
-        LimitLine todayLine = new LimitLine(100f, "Now");
+        Date now = new Date();
+        mToday = TimeUnit.MILLISECONDS.toDays(now.getTime());
+
+        LimitLine todayLine = new LimitLine(mToday, "Now");
         todayLine.setLineWidth(4f);
         todayLine.setLineColor(ColorTemplate.rgb("#e88b8b"));
         todayLine.enableDashedLine(10f, 10f, 0f);
@@ -140,13 +154,16 @@ public class ChartFragment extends BaseFragment implements OnChartValueSelectedL
         mChart.setOnChartGestureListener(this);
         mChart.setOnChartValueSelectedListener(this);
 
+        setData(this.setting);
+
         return view;
     }
 
-    public void setData(SelectionMenuData setting, float range) {
+    public void setData(SelectionMenuData setting) {
+        if (mChart == null || this.setting == null)
+            return;
         float from = setting.startDate;
-
-        // count = days
+        float range = 80;
         float to = setting.endDate;
 
         ArrayList<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
@@ -154,15 +171,15 @@ public class ChartFragment extends BaseFragment implements OnChartValueSelectedL
         ArrayList<ForecasterItemModel> forecasters = setting.forecasters;
         int colorCount = colors.length;
 
-        ArrayList<Entry> values = getRandomValues(from, to, 50);
+        ArrayList<Entry> values = getRandomValues(from, mToday, 40);
         int color = ColorTemplate.getHoloBlue();
 
         LineDataSet set = new LineDataSet(values, "Actual oil price");
         set.setAxisDependency(YAxis.AxisDependency.LEFT);
         set.setColor(color);
         set.setValueTextColor(color);
-        set.setLineWidth(1.5f);
-        set.setDrawCircles(true);
+        set.setLineWidth(2f);
+        set.setDrawCircles(false);
         set.setCircleColor(color);
         set.setDrawValues(false);
         set.setFillAlpha(65);
@@ -180,8 +197,8 @@ public class ChartFragment extends BaseFragment implements OnChartValueSelectedL
             set.setAxisDependency(YAxis.AxisDependency.LEFT);
             set.setColor(color);
             set.setValueTextColor(color);
-            set.setLineWidth(1.5f);
-            set.setDrawCircles(true);
+            set.setLineWidth(2f);
+            set.setDrawCircles(false);
             set.setCircleColor(color);
             set.setDrawValues(false);
             set.setFillAlpha(65);
@@ -235,6 +252,11 @@ public class ChartFragment extends BaseFragment implements OnChartValueSelectedL
     }
 
     @Override
+    public void onChartGestureMove(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
+
+    }
+
+    @Override
     public void onChartLongPressed(MotionEvent me) {
 
     }
@@ -278,5 +300,16 @@ public class ChartFragment extends BaseFragment implements OnChartValueSelectedL
                 break;
             }
         }
+    }
+
+    @Override
+    public void updateConfiguration(Configuration config) {
+
+    }
+
+    public void setSetting(SelectionMenuData setting) {
+        this.setting = setting;
+
+        setData(setting);
     }
 }

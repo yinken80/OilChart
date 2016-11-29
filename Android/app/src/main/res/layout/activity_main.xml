@@ -33,18 +33,14 @@
             android:background="@android:color/transparent"
             android:clickable="false"/>
     </RelativeLayout>
-    <fragment android:name="eu.gosocialdev.rextagpredictions.ui.ChartFragment"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/chartContainer"
-        android:layout_below="@id/selection_menu"
-        tools:layout="@layout/fragment_chart"/>
-    <fragment
-        android:name="eu.gosocialdev.rextagpredictions.ui.SelectionMenuFragment"
+        android:layout_below="@id/selection_menu"/>
+    <FrameLayout
         android:id="@+id/selection_menu_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/selection_menu"
-        tools:layout="@layout/fragment_selection_menu">
-    </fragment>
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/selection_menu"/>
 </RelativeLayout>

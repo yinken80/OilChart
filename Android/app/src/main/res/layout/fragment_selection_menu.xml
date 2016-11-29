@@ -1,88 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical" android:layout_width="match_parent"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
-    android:padding="@dimen/fragment_padding"
-    android:background="@color/fragment_background_normal"
-    >
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <RelativeLayout style="@style/GroupContainer">
-            <eu.gosocialdev.rextagpredictions.ui.views.CustomSpinner
-                android:id="@+id/spinOilType"
-                style="@style/CustomSpinner">
-            </eu.gosocialdev.rextagpredictions.ui.views.CustomSpinner>
-        </RelativeLayout>
-        <TextView
-            style="@style/GroupTitleText"
-            android:text="@string/oil_types" />
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dip"
-        android:layout_weight="1">
-        <RelativeLayout style="@style/GroupContainer"
-            android:layout_height="match_parent">
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/forecaster_list"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
-        </RelativeLayout>
-        <TextView
-            style="@style/GroupTitleText"
-            android:text="@string/forecasters" />
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <RelativeLayout style="@style/GroupContainer">
-            <TextView android:id="@+id/textDateRange"
-                style="@style/wrap_wrap"
-                android:padding="@dimen/textViewPadding"
-                android:textColor="@color/date_range_color"
-                android:text="@string/app_name"/>
-            <larpon.android.view.RangeSeekBar
-                xmlns:larpon="http://schemas.android.com/apk/res-auto"
-                android:id="@+id/dateRangeSeekBar"
-                android:layout_below="@id/textDateRange"
-                style="@style/match_wrap"
-                larpon:limitThumbRange="true"
-                larpon:orientation="horizontal"
-                larpon:scaleStep="5.0"
-                larpon:rangeDrawable="@drawable/range_seekbar_track"
-                larpon:thumbDrawable="@drawable/range_seekbar_thumb"
-                larpon:thumbHeight="30dp"
-                larpon:thumbWidth="20dp"
-                larpon:thumbs="2"
-                larpon:trackDrawable="@drawable/range_seekbar_background"/>
-
-        </RelativeLayout>
-        <TextView
-            style="@style/GroupTitleText"
-            android:text="@string/prediction_made_between" />
-    </RelativeLayout>
-
+    android:layout_width="match_parent">
     <LinearLayout
-        android:layout_width="match_parent"
+        android:orientation="vertical" android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <Button android:id="@+id/btnReset"
-            style="@style/EqualWidthButton"
-            android:background="@drawable/reset_button_background"
-            android:textColor="@color/reset_button_text_color"
-            android:text="@string/reset">
-        </Button>
-        <Button android:id="@+id/btnView"
-            style="@style/EqualWidthButton"
-            android:background="@drawable/view_button_background"
-            android:textColor="@color/view_button_text_color"
-            android:text="@string/view">
-        </Button>
+        android:padding="@dimen/fragment_padding"
+        android:background="@color/fragment_background_normal"
+        android:overScrollMode="ifContentScrolls"
+        >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <RelativeLayout style="@style/GroupContainer">
+                <eu.gosocialdev.rextagpredictions.ui.views.CustomSpinner
+                    android:id="@+id/spinOilType"
+                    style="@style/CustomSpinner">
+                </eu.gosocialdev.rextagpredictions.ui.views.CustomSpinner>
+            </RelativeLayout>
+            <TextView
+                style="@style/GroupTitleText"
+                android:text="@string/oil_types" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/rlayout_forecasters"
+            android:layout_width="match_parent"
+            android:layout_height="200dip"
+            android:minHeight="200dip">
+            <RelativeLayout style="@style/GroupContainer"
+                android:layout_height="match_parent">
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/forecaster_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>
+            </RelativeLayout>
+            <TextView
+                style="@style/GroupTitleText"
+                android:text="@string/forecasters" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <RelativeLayout style="@style/GroupContainer">
+                <TextView android:id="@+id/textDateRange"
+                    style="@style/wrap_wrap"
+                    android:padding="@dimen/textViewPadding"
+                    android:textColor="@color/date_range_color"
+                    android:text="@string/app_name"/>
+                <larpon.android.view.RangeSeekBar
+                    xmlns:larpon="http://schemas.android.com/apk/res-auto"
+                    android:id="@+id/dateRangeSeekBar"
+                    android:layout_below="@id/textDateRange"
+                    style="@style/match_wrap"
+                    larpon:limitThumbRange="true"
+                    larpon:orientation="horizontal"
+                    larpon:scaleStep="5.0"
+                    larpon:rangeDrawable="@drawable/range_seekbar_track"
+                    larpon:thumbDrawable="@drawable/range_seekbar_thumb"
+                    larpon:thumbHeight="30dp"
+                    larpon:thumbWidth="20dp"
+                    larpon:thumbs="2"
+                    larpon:trackDrawable="@drawable/range_seekbar_background"/>
+
+            </RelativeLayout>
+            <TextView
+                style="@style/GroupTitleText"
+                android:text="@string/prediction_made_between" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <Button android:id="@+id/btnReset"
+                style="@style/EqualWidthButton"
+                android:background="@drawable/reset_button_background"
+                android:textColor="@color/reset_button_text_color"
+                android:text="@string/reset">
+            </Button>
+            <Button android:id="@+id/btnView"
+                style="@style/EqualWidthButton"
+                android:background="@drawable/view_button_background"
+                android:textColor="@color/view_button_text_color"
+                android:text="@string/view">
+            </Button>
+        </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</ScrollView>

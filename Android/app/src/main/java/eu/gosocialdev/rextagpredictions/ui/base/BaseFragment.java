@@ -1,5 +1,6 @@
 package eu.gosocialdev.rextagpredictions.ui.base;
 
+import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -30,4 +31,6 @@ public abstract class BaseFragment extends Fragment {
     protected float getRandom(float range, float startsfrom) {
         return (float) (Math.random() * range) + startsfrom;
     }
+
+    abstract public void updateConfiguration(Configuration config);
 }

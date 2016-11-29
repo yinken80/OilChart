@@ -1,14 +1,18 @@
 package eu.gosocialdev.rextagpredictions.ui;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Selection;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
@@ -18,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import eu.gosocialdev.rextagpredictions.R;
 import eu.gosocialdev.rextagpredictions.ui.adapters.ForecasterListAdapter;
+import eu.gosocialdev.rextagpredictions.ui.base.BaseFragment;
 import eu.gosocialdev.rextagpredictions.ui.models.ForecasterItemModel;
 import eu.gosocialdev.rextagpredictions.ui.models.SelectionMenuData;
 import eu.gosocialdev.rextagpredictions.ui.views.CustomSpinner;
@@ -27,7 +32,7 @@ import larpon.android.view.RangeSeekBar;
  * Created by Administrator on 11/17/2016.
  */
 
-public class SelectionMenuFragment extends Fragment implements View.OnClickListener, RangeSeekBar.RangeSeekBarListener {
+public class SelectionMenuFragment extends BaseFragment implements View.OnClickListener, RangeSeekBar.RangeSeekBarListener {
     String[] forecasters = new String[]{"Hart Energy Forecaster Index", "ABN AMRO",
             "Bank of America", "Barclays", "Bernstein Research", "Bloomberg", "BNP Paribas",
             "Capital Economics", "CitiGroup"};
@@ -40,20 +45,19 @@ public class SelectionMenuFragment extends Fragment implements View.OnClickListe
     View            btnReset, btnView;
     RangeSeekBar    mDateRanger;
     TextView        mDateRangeText;
+    RelativeLayout  mRLayoutForecasters;
 
     // property values
     ArrayList<ForecasterItemModel> mForecasters;
     long mMinDate, mMaxDate;
 
     // value containing overall settings
-    SelectionMenuData setting;
+    SelectionMenuData setting = new SelectionMenuData();
 
     // litener
     ISelectionMenu mListener;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public SelectionMenuFragment() {
         mForecasters = new ArrayList<ForecasterItemModel>();
         //TEST DATA
         for (int i = 0; i < forecasters.length; i++) {
@@ -64,8 +68,13 @@ public class SelectionMenuFragment extends Fragment implements View.OnClickListe
             }
             mForecasters.add(item);
         }
+    }
 
-        setting = new SelectionMenuData();
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setRetainInstance(true);
     }
 
     @Override
@@ -73,6 +82,8 @@ public class SelectionMenuFragment extends Fragment implements View.OnClickListe
                              ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_selection_menu, container, false);
+        mRLayoutForecasters = (RelativeLayout) view.findViewById(R.id.rlayout_forecasters);
+
         mOilTypeSpinner = (CustomSpinner) view.findViewById(R.id.spinOilType);
         mForecasterListView = (RecyclerView) view.findViewById(R.id.forecaster_list);
 
@@ -109,6 +120,9 @@ public class SelectionMenuFragment extends Fragment implements View.OnClickListe
 
         //initialize date ranger
         mDateRanger.setListener(this);
+        mDateRanger.setLimitThumbRange(false);
+
+        updateViews();
 
         return view;
     }
@@ -128,7 +142,7 @@ public class SelectionMenuFragment extends Fragment implements View.OnClickListe
 
     @Override
     public void onCreate(RangeSeekBar rangeSeekBar, int index, float value) {
-
+        updateViews();
     }
 
     @Override
@@ -156,6 +170,20 @@ public class SelectionMenuFragment extends Fragment implements View.OnClickListe
         updateDateText();
     }
 
+    @Override
+    public void updateConfiguration(Configuration config) {
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)mRLayoutForecasters.getLayoutParams();
+        if (config.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            params.height = 0;
+            params.weight = 1;
+            mRLayoutForecasters.setLayoutParams(params);
+        } else if (config.orientation == Configuration.ORIENTATION_LANDSCAPE){
+            params.height = 200;
+            params.weight = 0;
+            mRLayoutForecasters.setLayoutParams(params);
+        }
+    }
+
     Handler mHandler = new Handler();
 
     /**
@@ -170,18 +198,25 @@ public class SelectionMenuFragment extends Fragment implements View.OnClickListe
     public void setDateRange(long minDate, long maxDate) {
         this.mMinDate = minDate;
         this.mMaxDate = maxDate;
-        mDateRanger.setScaleRangeMin(minDate);
-        mDateRanger.setScaleRangeMax(maxDate);
-        RangeSeekBar.Thumb left = mDateRanger.getThumbAt(0);
-        RangeSeekBar.Thumb right = mDateRanger.getThumbAt(1);
-        left.setValue(minDate);
-        right.setValue(maxDate);
-        mDateRanger.invalidate();
 
         setting.oilType = 0;
         setting.forecasters = mForecasters;
         setting.startDate = minDate;
         setting.endDate = maxDate;
+
+        updateViews();
+    }
+
+    private void updateViews() {
+        if (mDateRanger == null)
+            return;
+
+        mDateRanger.setScaleRangeMin(mMinDate);
+        mDateRanger.setScaleRangeMax(mMaxDate);
+        RangeSeekBar.Thumb left = mDateRanger.getThumbAt(0);
+        RangeSeekBar.Thumb right = mDateRanger.getThumbAt(1);
+        left.setValue(this.setting.startDate);
+        right.setValue(this.setting.endDate);
 
         updateDateText();
     }
@@ -190,10 +225,28 @@ public class SelectionMenuFragment extends Fragment implements View.OnClickListe
      * Return setting value
      */
     public SelectionMenuData getSetting() {
-        setting.forecasters = ((ForecasterListAdapter)mForecasterListView.getAdapter()).selectedItems();
+        setting.forecasters = selectedItems();
         return setting;
     }
 
+    private ArrayList<ForecasterItemModel> selectedItems() {
+        if (mForecasters == null)
+            return null;
+        ArrayList<ForecasterItemModel> items = new ArrayList<ForecasterItemModel>();
+        for (int  i = 0; i < mForecasters.size(); i++) {
+            if (mForecasters.get(i).isChecked()) {
+                items.add(mForecasters.get(i));
+            }
+        }
+        return items;
+    }
+
+    /**
+     * Set setting value
+     */
+    public void setSetting(SelectionMenuData setting) {
+        this.setting = setting;
+    }
     /**
      * Update the label of date range textview
      */
@@ -226,8 +279,7 @@ public class SelectionMenuFragment extends Fragment implements View.OnClickListe
 
     private void view() {
         setting.oilType = mOilTypeSpinner.getSelectedItemPosition();
-        ForecasterListAdapter adapter = (ForecasterListAdapter)mForecasterListView.getAdapter();
-        setting.forecasters = adapter.selectedItems();
+        setting.forecasters = selectedItems();
         if (mListener != null) {
             mListener.onView(setting);
         }

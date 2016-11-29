@@ -1,0 +1,43 @@
+ocaccordian {
+    .open, .close {
+        position: absolute;
+        z-index: 1;
+        right: 5px;
+        top: 12px;
+        width: 15px;
+        height: 15px;
+    }
+
+    .header {
+        display: flex;
+        padding: 6px 8px;
+        border-bottom: 1px solid #d0d0d0;
+        border-radius: 0px 6px 0px 0px;
+        border-right: 1px solid #aeaeae;
+        border-top: 1px solid #aeaeae;
+        border-right: 1px solid #a0a0a0;
+        background: -webkit-linear-gradient(#fff,#f0f0f0,#e6e6e6,#e3e3e3, #eaeaea);
+        align-items: center;
+        justify-content: space-between;
+        flex: 1;
+        flex-direction: row;
+        min-height: 44px;
+
+        .titleText {
+            flex: 1;
+        }        
+    }
+
+    .accordian-content {
+        overflow:hidden;
+        &.opened {
+            height:auto;
+        }
+
+        &.closed {
+            height: 0px;
+        }
+
+        transition: height .5s linear, display .2s linear .5s;   
+    }
+}

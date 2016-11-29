@@ -45,14 +45,4 @@ public class ForecasterListAdapter extends RecyclerView.Adapter<ForecasterListIt
     public void onCheckedChanged(int index, boolean bChecked) {
         forecasters.get(index).setChecked(bChecked);
     }
-
-    public ArrayList<ForecasterItemModel> selectedItems() {
-        ArrayList<ForecasterItemModel> items = new ArrayList<ForecasterItemModel>();
-        for (int  i = 0; i < forecasters.size(); i++) {
-            if (forecasters.get(i).isChecked()) {
-                items.add(forecasters.get(i));
-            }
-        }
-        return items;
-    }
 }

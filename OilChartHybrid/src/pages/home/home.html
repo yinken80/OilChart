@@ -1,0 +1,55 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      Hart Energy Forcaster Index Chart
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+  <ocaccordian #menu title="Selection Menu">
+    <div id="mainMenuContent">
+      <div class="container">
+        <div class="title"><b>Oil types:</b></div>
+        <div class="content">
+          <ion-select class="full-width" [(ngModel)]="options.oilType">
+            <ion-option *ngFor="let type of oilTypes;let i = index;" value="{{i}}">{{type}}</ion-option>
+          </ion-select>
+        </div>
+      </div>
+      <div class="container">
+        <div class="title"><b>Forecasters:</b></div>
+        <div class="content">
+          <ion-list id="forecasters" no-lines>
+            <ion-item *ngFor="let forecaster of options.forecasters; let i = index">
+              <ion-label>{{forecaster.text}}</ion-label>
+              <ion-checkbox color="dark" [(ngModel)]="forecaster.checked"></ion-checkbox>
+            </ion-item>
+          </ion-list>
+        </div>
+      </div>
+      <div class="container">
+        <div class="title"><b>Predictions Made Between:</b></div>
+        <div class="content">
+          <ion-label id="dateRangeText">{{options.dateRange.lower | date:"EEE MMM dd yyyy"}} - {{options.dateRange.upper | date:"EEE MMM dd yyyy"}}</ion-label>
+          <ion-range (ionChange)="onChangeDate()" steps="86400" dualKnobs="true" [(ngModel)]="options.dateRange" [min]="minDate" [max]="maxDate">
+          </ion-range>
+        </div>
+      </div>
+      <ion-row>
+        <ion-col width-50>
+          <button ion-button id="reset" (click)="onReset()">Reset</button>
+        </ion-col>
+        <ion-col width-50>
+          <button ion-button id="view" (click)="onView()">View</button>
+        </ion-col>
+      </ion-row>
+    </div>
+  </ocaccordian>
+  <amCharts *ngIf="!loading" [id]="id" [options]="chart">
+    <div id="loading" *ngIf="loading">
+      <img src="assets/img/loading-gears-animation.gif"><br>
+      <span>Chart is loading...</span>
+    </div>
+  </amCharts>
+</ion-content>
