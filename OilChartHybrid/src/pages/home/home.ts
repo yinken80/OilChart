@@ -4,6 +4,7 @@ import {Http, Response} from '@angular/http';
 import { NavController } from 'ionic-angular';
 import { Toast } from 'ionic-native';
 import { Utils } from '../../providers/utils';
+import { ChartService } from '../../providers/chart.service';
 import { IForeCaster, ForeCaster } from '../../models/forecaster.model';
 import { SelectOptions } from '../../models/selectOptions.model';
 import { OcAccordian } from '../../components/OcAccordian/ocAccordian.component';
@@ -33,6 +34,7 @@ export class HomePage {
   oilTypes: string[] = ["Global Oil Price Avg", "West Texas Inter. (WTI)", "Brent"];
   forecasterNames: string[] = ["Hart Energy Forecaster Index", "ABN AMRO", "Bank of America", "Bernstein Research",
         "Bloomberg", "BNP Paribas"];
+  forecasterIds: string[] = ["0", "103", "6", "5", "65", "57"];
   minDate: number;
   maxDate: number;
 
@@ -42,24 +44,8 @@ export class HomePage {
 
   options: SelectOptions;
 
-  constructor(public navCtrl: NavController, private http:Http, private utils:Utils) {
-    this.http.get('assets/data/test_data.json').subscribe((value:Response) => {
-        let body = value.json();
-        if (body) {
-          this.data = body.data;
-          this.graphs = body.graphs;
-          this.chart = this.makeChart({
-            dataProvider: this.data,
-            graphs: this.graphs,
-            currentDate: this.currentDate,
-            listener: () => {
-              this.loading = false;
-            },
-            saveFs: this.saveDataToFile.bind(this)
-          });
-          this.loading = false;
-        }
-    });
+  constructor(public navCtrl: NavController, private cs:ChartService, private utils:Utils) {
+    let ids:string[] = ["0"];
     this.minDate = new Date(2015, 1, 1).getTime();
     this.maxDate = new Date().getTime();
 
@@ -74,18 +60,50 @@ export class HomePage {
       }
 
       fc.text = value;
+      fc.id = this.forecasterIds[index];
 
       this.options.forecasters.push(fc);
     });
+
+    /*this.cs.getChartData(ids, 0, this.options.dateRange.lower, this.dateRange.upper).then(this.parseData)
+      .catch(error=> {
+        alert(error);
+      });*/
+  }
+
+  parseChartData(value) {
+    this.data = value.dataProvider;
+    this.graphs = value.graphs;
+    this.chart = this.makeChart({
+      dataProvider: this.data,
+      graphs: this.graphs,
+      currentDate: this.currentDate,
+      listener: () => {
+        this.loading = false;
+      },
+      saveFs: this.saveDataToFile.bind(this)
+    });
+    this.loading = false;
   }
 
   onChangeDate() {
     var startDate, endDate:Date;
-    
   }
 
   onView() {
     //this.menu.onClose();
+    this.loading = true;
+    let ids:string[]=[];
+    this.options.forecasters.forEach(forecaster => {
+      if (forecaster.checked)
+        ids.push(forecaster.id);
+    });
+    let startDate = new Date(this.options.dateRange.lower).toString();
+    let endDate = new Date(this.options.dateRange.upper).toString();
+    /*this.cs.getChartData(ids, this.options.oilType, startDate, endDate).then(this.parseData)
+      .catch(error=> {
+        alert(error);
+      });*/
   }
 
   onReset() {
@@ -97,7 +115,6 @@ export class HomePage {
     });
     this.options.dateRange.upper = this.minDate;
     this.options.dateRange.lower = this.maxDate;
-    //this.menu.onClose();
   }
 
   saveDataToFile(data, type) {

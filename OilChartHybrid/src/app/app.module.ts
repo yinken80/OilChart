@@ -5,6 +5,7 @@ import { HomePage } from '../pages/home/home';
 import { AmChartsComponent } from "../components/amcharts.component";
 import { OcAccordian } from "../components/OcAccordian/ocAccordian.component";
 import { Utils } from "../providers/utils"; 
+import { ChartService } from '../providers/chart.service';
 
 @NgModule({
   declarations: [
@@ -21,6 +22,6 @@ import { Utils } from "../providers/utils";
     MyApp,
     HomePage
   ],
-  providers: [{provide: ErrorHandler, useClass: IonicErrorHandler}, Utils]
+  providers: [{provide: ErrorHandler, useClass: IonicErrorHandler}, Utils, ChartService]
 })
 export class AppModule {}
