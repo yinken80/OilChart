@@ -46,10 +46,12 @@
       </ion-row>
     </div>
   </ocaccordian>
-  <amCharts *ngIf="!loading" [id]="id" [options]="chart">
+  <div class="chart">
+    <amCharts *ngIf="!loading" [id]="id" [options]="chart">
+    </amCharts>
     <div id="loading" *ngIf="loading">
-      <img src="assets/img/loading-gears-animation.gif"><br>
-      <span>Chart is loading...</span>
+        <img src="assets/img/loading-gears-animation.gif"><br>
+        <span>Chart is loading...</span>
     </div>
-  </amCharts>
+  </div>
 </ion-content>

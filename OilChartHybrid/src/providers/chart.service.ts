@@ -13,7 +13,7 @@ export class ChartService {
      */
     public getChartData(ids:string[], oilType:number, startDate:string, endDate:string) {
         let url = `${this.Base_Url}?id=${ids.join(",")}`
-                        +`&oilType=${oilType}&startDate=${startDate}&endDate=${endDate}`;
+                        +`&oiltype=${oilType}&startdate=${startDate}&enddate=${endDate}`;
         return new Promise<any>((resolve, reject) => {
             this.http.get(url).subscribe(response=> {
                 let body = response.json();

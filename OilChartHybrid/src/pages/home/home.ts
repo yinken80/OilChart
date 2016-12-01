@@ -48,6 +48,7 @@ export class HomePage {
     let ids:string[] = ["0"];
     this.minDate = new Date(2015, 1, 1).getTime();
     this.maxDate = new Date().getTime();
+    this.currentDate = new Date().toISOString();
 
     this.options = new SelectOptions();
     this.options.dateRange.lower = this.minDate;
@@ -65,10 +66,11 @@ export class HomePage {
       this.options.forecasters.push(fc);
     });
 
-    /*this.cs.getChartData(ids, 0, this.options.dateRange.lower, this.dateRange.upper).then(this.parseData)
+    this.cs.getChartData(ids, 0, "2015-01-01", "2016-11-29").then(this.parseChartData.bind(this))
       .catch(error=> {
+        this.loading = false;
         alert(error);
-      });*/
+      });
   }
 
   parseChartData(value) {
@@ -78,12 +80,15 @@ export class HomePage {
       dataProvider: this.data,
       graphs: this.graphs,
       currentDate: this.currentDate,
-      listener: () => {
-        this.loading = false;
-      },
+      listener: this.onFinishLoad.bind(this),
       saveFs: this.saveDataToFile.bind(this)
     });
     this.loading = false;
+  }
+
+  onFinishLoad(e) {
+    this.loading = false;
+    console.log("loaded");
   }
 
   onChangeDate() {
@@ -98,15 +103,17 @@ export class HomePage {
       if (forecaster.checked)
         ids.push(forecaster.id);
     });
-    let startDate = new Date(this.options.dateRange.lower).toString();
-    let endDate = new Date(this.options.dateRange.upper).toString();
-    /*this.cs.getChartData(ids, this.options.oilType, startDate, endDate).then(this.parseData)
-      .catch(error=> {
-        alert(error);
-      });*/
+    let startDate = new Date(this.options.dateRange.lower).toISOString();
+    let endDate = new Date(this.options.dateRange.upper).toISOString();
+    this.cs.getChartData(ids, this.options.oilType, startDate, endDate).then(this.parseChartData.bind(this))
+    .catch(error=> {
+      this.loading = false;
+      alert(error);
+    });
   }
 
   onReset() {
+    this.loading = true;
     this.options.oilType = 0;
     this.options.forecasters.forEach((forecaster, index)=>{
       forecaster.checked = false;
@@ -115,6 +122,14 @@ export class HomePage {
     });
     this.options.dateRange.upper = this.minDate;
     this.options.dateRange.lower = this.maxDate;
+    let startDate = new Date(this.minDate).toISOString();
+    let endDate = new Date(this.maxDate).toISOString();
+
+    this.cs.getChartData(["0"], this.options.oilType, startDate, endDate).then(this.parseChartData.bind(this))
+    .catch(error=> {
+      this.loading = false;
+      alert(error);
+    });
   }
 
   saveDataToFile(data, type) {

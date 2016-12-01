@@ -1,13 +1,17 @@
 page-home {
-    #chartdiv {
+    .chart {
         width: 100%;
         height: calc(100% - 44px);
+    }
+    #chartdiv {
+        width: 100%;
+        height: 100%;
     }
 
     #loading {
         display: block;
-        position: absolute;
-        top: 25%;
+        position: relative;
+        top: 30%;
         width: 80%;
         text-align: center;
         overflow: hidden;
