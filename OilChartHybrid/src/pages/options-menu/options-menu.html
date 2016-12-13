@@ -1,0 +1,39 @@
+<div class="main" (click)="onClickMain()" [@visibilityChanged]="visibility" (@visibilityChanged.done)="onEndAnimation($event)">
+  <div id="mainMenuContent">
+    <div class="container">
+      <div class="title"><b>Oil Market Price:</b></div>
+      <div class="content">
+        <ion-select class="full-width" [(ngModel)]="options.oilType">
+          <ion-option *ngFor="let type of options.oilTypes;let i = index;" [value]="type.id">{{type.name}}</ion-option>
+        </ion-select>
+      </div>
+    </div>
+    <div class="container">
+      <div class="title"><b>Forecasters:</b></div>
+      <div class="content">
+        <ion-list id="forecasters" no-lines>
+          <ion-item *ngFor="let forecaster of options.forecasters; let i = index" class="item-compact">
+            <ion-label>{{forecaster.text}}</ion-label>
+            <ion-checkbox color="dark" [(ngModel)]="forecaster.checked"></ion-checkbox>
+          </ion-item>
+        </ion-list>
+      </div>
+    </div>
+    <!--<div class="container">
+      <div class="title"><b>Predictions Made Between:</b></div>
+      <div class="content">
+        <ion-label id="dateRangeText">{{options.dateRange.lower | date:"EEE MMM dd yyyy"}} - {{options.dateRange.upper | date:"EEE MMM dd yyyy"}}</ion-label>
+        <ion-range name="dateRanger" (ionChange)="onChangeDate()" steps="86400" dualKnobs="true" [(ngModel)]="options.dateRange" [min]="minDate" [max]="maxDate" forControlName="dateRanger">
+        </ion-range>
+      </div>
+    </div>-->
+    <ion-row>
+      <ion-col width-50>
+        <button ion-button id="reset" (click)="onReset()">Reset</button>
+      </ion-col>
+      <ion-col width-50>
+        <button ion-button id="view" (click)="onView()">View</button>
+      </ion-col>
+    </ion-row>
+  </div>
+</div>

@@ -1,0 +1,17 @@
+<div class="main" [@visibilityChanged]="visibility" (@visibilityChanged.done)="onEndAnimation($event)">
+  <div class="content" padding>
+    <h4>Crude Oil Pricing Forecast Index (OPF Index)</h4>
+    <h4>Have you ever wondered what the price of oil would be in the future?</h4>
+    <p>Of course you have! Especially in the current market.</p>
+    <h4>How could you plan for the future?</h4>
+    <p>You could consult your magic 8-ball; you could follow your ‘gut’;you could run complex production and demand models; or you could hire a consulting firm; but most of us look outside for what market experts are forecasting.</p>
+    <p>The Crude Oil Pricing Forecast Index (OPF Index) is the remarkably simple tool designed to answer all those questions.</p>
+    <p>The OPF Index does all the data aggregation from thousands of sources, qualifies their predictions, ranks their past accuracy and presents a single unified weighted index made up of thousands of predictions from hundreds of forecasters.</p>
+    <h4>The result?</h4>
+    <p>A forecasting index that has proven to be more accurate than any single forecaster in predicting the future price of oil.</p>
+
+    <div class="row" text-center>
+      <button ion-button color="primary" (click)="onMore()">Learn More</button>
+    </div>
+  </div> 
+</div>

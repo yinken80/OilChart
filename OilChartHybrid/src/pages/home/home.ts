@@ -1,13 +1,16 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild} from '@angular/core';
 import {Http, Response} from '@angular/http';
 
-import { NavController } from 'ionic-angular';
+import { NavController, Range, LoadingController, Loading,
+  ModalController } from 'ionic-angular';
 import { Toast } from 'ionic-native';
 import { Utils } from '../../providers/utils';
 import { ChartService } from '../../providers/chart.service';
-import { IForeCaster, ForeCaster } from '../../models/forecaster.model';
-import { SelectOptions } from '../../models/selectOptions.model';
-import { OcAccordian } from '../../components/OcAccordian/ocAccordian.component';
+import { IForeCaster, ForeCaster,
+  IOilType, OilType,
+  SelectOptions, ActionTypes } from '../../models';
+import { OptionsMenuPage } from '../options-menu/options-menu';
+import { InformationPage } from '../information/information';
 
 interface Configuration {
   dataProvider: Array<any>;
@@ -21,7 +24,8 @@ interface Configuration {
   templateUrl: 'home.html'
 })
 export class HomePage {
-  @ViewChild('menu') menu:OcAccordian;
+  @ViewChild('menu') menu:OptionsMenuPage;
+  @ViewChild('info') info:InformationPage;
 
   private id: string = "chartdiv";
 
@@ -29,48 +33,104 @@ export class HomePage {
 
   private graphs: any;
 
-  private currentDate: string = "09/01/2015";
+  private currentDate: string;
+  
+  private oilTypes: OilType[] = [];
 
-  oilTypes: string[] = ["Global Oil Price Avg", "West Texas Inter. (WTI)", "Brent"];
-  forecasterNames: string[] = ["Hart Energy Forecaster Index", "ABN AMRO", "Bank of America", "Bernstein Research",
-        "Bloomberg", "BNP Paribas"];
-  forecasterIds: string[] = ["0", "103", "6", "5", "65", "57"];
-  minDate: number;
-  maxDate: number;
-
-  chart: {[key:string]:any};
+  chart: {[key:string]:any} = null;
 
   loading: boolean = true;
 
   options: SelectOptions;
+  savingPopup:Loading;
 
-  constructor(public navCtrl: NavController, private cs:ChartService, private utils:Utils) {
-    let ids:string[] = ["0"];
-    this.minDate = new Date(2015, 1, 1).getTime();
-    this.maxDate = new Date().getTime();
+  constructor(public navCtrl: NavController, private cs:ChartService, private utils:Utils,
+    private loadingCtrl:LoadingController, private modalCtrl:ModalController) {
     this.currentDate = new Date().toISOString();
-
+    let ids:string[] = ["0"];
     this.options = new SelectOptions();
-    this.options.dateRange.lower = this.minDate;
-    this.options.dateRange.upper = this.maxDate;
 
-    this.forecasterNames.forEach((value:string, index:number) => {
-      let fc:ForeCaster = new ForeCaster();
-      if (index == 0) {
-        fc.checked = true;
-      }
-
-      fc.text = value;
-      fc.id = this.forecasterIds[index];
-
-      this.options.forecasters.push(fc);
+    this.cs.getOilTypes().then(oilTypes => {
+          this.options.oilTypes = oilTypes ? oilTypes:[];
+          if (oilTypes && oilTypes.length > 0) {
+            this.options.oilType = oilTypes[0].id;
+          }          
+          this.cs.getForecasters().then(forecasters => {
+            this.options.forecasters = forecasters ? forecasters:[];
+            this.loadChart();
+          }).catch(error => {
+            this.loading = false;
+          });
+    }).catch(error => {
+          this.loading = false;
     });
+  }
 
-    this.cs.getChartData(ids, 0, "2015-01-01", "2016-11-29").then(this.parseChartData.bind(this))
-      .catch(error=> {
-        this.loading = false;
-        alert(error);
-      });
+  onMenuToggle() {
+    this.info.hide();
+    this.menu.toggleVisibility();
+  }
+
+  onInformation() {
+    this.menu.hide();
+    this.info.toggleVisibility();
+  }
+
+  onReset() {
+    this.resetChart();
+  }
+
+  onView(value) {
+    this.options = value.options;
+    this.loadChart();
+  }
+
+  onGoHomePage() {
+    window.open("http://www.hartenergy.com", "_system");
+  }
+
+  loadChart() {
+    this.loading = true;
+    let ids:string[]=[];
+    this.options.forecasters.forEach(forecaster => {
+      if (forecaster.checked)
+        ids.push(forecaster.id);
+    });
+    let startDate = new Date('2015-01-01').toISOString();
+    let endDate = new Date().toISOString();
+       
+    this.cs.getChartData(ids, this.options.oilType, startDate, endDate).then(this.parseChartData.bind(this))
+    .catch(error=> {
+      this.loading = false;
+      this.chart = null;
+      alert(error);
+    });
+  }
+
+  resetChart() {
+    this.loading = true;
+    if (this.options.oilTypes && this.options.oilTypes.length > 0) {
+      this.options.oilType = this.options.oilTypes[0].id;
+    }    
+    this.options.forecasters.forEach((forecaster, index)=>{
+      forecaster.checked = false;
+      if (index == 0)
+        forecaster.checked = true;
+    });
+    let startDate = new Date('2015-01-01').toISOString();
+    let endDate = new Date().toISOString();
+
+    let ids = [];
+    if (this.options.forecasters && this.options.forecasters.length > 0) {
+      ids.push(this.options.forecasters[0].id);
+    }
+
+    this.cs.getChartData(ids, this.options.oilType, startDate, endDate).then(this.parseChartData.bind(this))
+    .catch(error=> {
+      this.loading = false;
+      this.chart = null;
+      alert(error);
+    });
   }
 
   parseChartData(value) {
@@ -88,51 +148,13 @@ export class HomePage {
 
   onFinishLoad(e) {
     this.loading = false;
-    console.log("loaded");
-  }
-
-  onChangeDate() {
-    var startDate, endDate:Date;
-  }
-
-  onView() {
-    //this.menu.onClose();
-    this.loading = true;
-    let ids:string[]=[];
-    this.options.forecasters.forEach(forecaster => {
-      if (forecaster.checked)
-        ids.push(forecaster.id);
-    });
-    let startDate = new Date(this.options.dateRange.lower).toISOString();
-    let endDate = new Date(this.options.dateRange.upper).toISOString();
-    this.cs.getChartData(ids, this.options.oilType, startDate, endDate).then(this.parseChartData.bind(this))
-    .catch(error=> {
-      this.loading = false;
-      alert(error);
-    });
-  }
-
-  onReset() {
-    this.loading = true;
-    this.options.oilType = 0;
-    this.options.forecasters.forEach((forecaster, index)=>{
-      forecaster.checked = false;
-      if (index == 0)
-        forecaster.checked = true;
-    });
-    this.options.dateRange.upper = this.minDate;
-    this.options.dateRange.lower = this.maxDate;
-    let startDate = new Date(this.minDate).toISOString();
-    let endDate = new Date(this.maxDate).toISOString();
-
-    this.cs.getChartData(["0"], this.options.oilType, startDate, endDate).then(this.parseChartData.bind(this))
-    .catch(error=> {
-      this.loading = false;
-      alert(error);
-    });
   }
 
   saveDataToFile(data, type) {
+    this.savingPopup = this.loadingCtrl.create({
+      content:"Saving..."
+    });
+    this.savingPopup.present();
     // Split the base64 string in data and contentType
     var block = data.split(";");
     console.log(block);
@@ -150,12 +172,14 @@ export class HomePage {
     }
 
     this.utils.saveFileTo(name, DataBlob).then((path) => {
+      this.savingPopup.dismiss();
       Toast.show("File saved at " + path, '5000', 'center').subscribe(
         toast => {
           console.log(toast);
         }
       );
     }, (reason) => {
+      this.savingPopup.dismiss();
       Toast.show("Failed to save chart as an image", '5000', 'center').subscribe(
         toast => {
           console.log(toast);
@@ -286,7 +310,7 @@ export class HomePage {
         method: listener
       }],
       export: {
-        enabled : true,
+        enabled : false,
         menu: [{
           class: "export-main",
           menu: [{

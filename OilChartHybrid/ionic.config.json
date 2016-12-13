@@ -1,12 +1,12 @@
 {
   "name": "OilChartHybrid",
-  "app_id": "17f1d2dd",
+  "app_id": "8b2789a6",
   "v2": true,
   "typescript": true,
   "proxies": [
     {
       "path": "/rextag",
-      "proxyUrl": "http://rextagpredictions.gosocialdev.eu"
+      "proxyUrl": "http://rextagpredictions.gosocialdev.eu/"
     }
   ]
 }

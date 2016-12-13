@@ -1,53 +1,28 @@
 <ion-header>
-  <ion-navbar>
+  <ion-navbar color="navbarColor">
+    <button ion-button icon-only menuToggle (click)="onMenuToggle()">
+        <ion-icon name="menu"></ion-icon>
+    </button>
     <ion-title>
-      Hart Energy Forcaster Index Chart
+      <span class="btn btn-link" (click)="onGoHomePage()">
+        <b>HART</b>ENGERGY
+      </span>
     </ion-title>
+    <ion-buttons end>
+      <button ion-button (click)="onInformation()">
+        <ion-icon name="information-circle"></ion-icon>
+      </button>
+    </ion-buttons>
   </ion-navbar>
 </ion-header>
 
 <ion-content>
-  <ocaccordian #menu title="Selection Menu">
-    <div id="mainMenuContent">
-      <div class="container">
-        <div class="title"><b>Oil types:</b></div>
-        <div class="content">
-          <ion-select class="full-width" [(ngModel)]="options.oilType">
-            <ion-option *ngFor="let type of oilTypes;let i = index;" value="{{i}}">{{type}}</ion-option>
-          </ion-select>
-        </div>
-      </div>
-      <div class="container">
-        <div class="title"><b>Forecasters:</b></div>
-        <div class="content">
-          <ion-list id="forecasters" no-lines>
-            <ion-item *ngFor="let forecaster of options.forecasters; let i = index">
-              <ion-label>{{forecaster.text}}</ion-label>
-              <ion-checkbox color="dark" [(ngModel)]="forecaster.checked"></ion-checkbox>
-            </ion-item>
-          </ion-list>
-        </div>
-      </div>
-      <div class="container">
-        <div class="title"><b>Predictions Made Between:</b></div>
-        <div class="content">
-          <ion-label id="dateRangeText">{{options.dateRange.lower | date:"EEE MMM dd yyyy"}} - {{options.dateRange.upper | date:"EEE MMM dd yyyy"}}</ion-label>
-          <ion-range (ionChange)="onChangeDate()" steps="86400" dualKnobs="true" [(ngModel)]="options.dateRange" [min]="minDate" [max]="maxDate">
-          </ion-range>
-        </div>
-      </div>
-      <ion-row>
-        <ion-col width-50>
-          <button ion-button id="reset" (click)="onReset()">Reset</button>
-        </ion-col>
-        <ion-col width-50>
-          <button ion-button id="view" (click)="onView()">View</button>
-        </ion-col>
-      </ion-row>
-    </div>
-  </ocaccordian>
+  <page-options-menu #menu id="options" [options]="options" (reset)="onReset()" (view)="onView($event)">
+  </page-options-menu>
+  <page-information #info id="info">
+  </page-information>
   <div class="chart">
-    <amCharts *ngIf="!loading" [id]="id" [options]="chart">
+    <amCharts *ngIf="!loading&&chart!=null" [id]="id" [options]="chart">
     </amCharts>
     <div id="loading" *ngIf="loading">
         <img src="assets/img/loading-gears-animation.gif"><br>
