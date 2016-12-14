@@ -1,19 +1,57 @@
 import {Injectable} from '@angular/core';
 import {Http} from '@angular/http';
-import {OilType, ForeCaster} from '../models';
+import { Storage } from '@ionic/storage';
+import {OilType, ForeCaster, SelectOptions} from '../models';
 
 @Injectable()
 export class ChartService {
-    private Base_Url:string = "http://rextagpredictions.gosocialdev.eu";
+    private Base_Url:string = "https://rextag.com/OPFIndex/API";
     //private Base_Url:string = "http://localhost:8100/rextag";
-    private GetChartData_Url = this.Base_Url + "/json_mainChart.php";
-    private GetOilTypes_Url = this.Base_Url + "/API/getOilTypes.php";
-    private GetForecasters_Url = this.Base_Url + "/API/getForecastersList.php";
-    private GetPredictionPeriod_Url = this.Base_Url + "/API/getPredictionsPeriod.php";
+    private GetChartData_Url = this.Base_Url + "/getMainChart.php";
+    private GetOilTypes_Url = this.Base_Url + "/getOilTypes.php";
+    private GetForecasters_Url = this.Base_Url + "/getForecastersList.php";
+    private GetPredictionPeriod_Url = this.Base_Url + "/getPredictionsPeriod.php";
+    private options:SelectOptions;
 
-    constructor(private http:Http) {
+    constructor(private http:Http, private storage:Storage) {
     }
 
+    /**
+     * 
+     */
+    public setSelectOptions(options) {
+        this.options = options;
+    }
+
+    public getSelectOptions() {
+        return this.options;
+    }
+
+    public saveSelectOptions() {
+        if (this.options) {
+            this.storage.set("options", this.options);
+        }        
+    }
+
+    public loadSelectOptions() {
+        return new Promise<any>((resolve, reject) => {
+            if (this.options) {
+                resolve(this.options);
+            } else {
+                this.storage.get("options").then(value => {
+                    if (value) {
+                        this.options = value;
+                        resolve(value);
+                    } else {
+                        this.options = null;
+                        resolve(null);
+                    }
+                }).catch(error => {
+                    reject(error);
+                });
+            }
+        });        
+    }
     /**
      * This function is to get data of graphs and dataProvider for chart.
      */

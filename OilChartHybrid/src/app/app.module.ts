@@ -1,5 +1,6 @@
 import { NgModule, ErrorHandler } from '@angular/core';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
+import { Storage } from '@ionic/storage';
 import { MyApp } from './app.component';
 import { HomePage } from '../pages/home/home';
 import { OptionsMenuPage } from '../pages/options-menu/options-menu';
@@ -28,6 +29,6 @@ import { ChartService } from '../providers/chart.service';
     OptionsMenuPage,
     InformationPage
   ],
-  providers: [{provide: ErrorHandler, useClass: IonicErrorHandler}, Utils, ChartService]
+  providers: [{provide: ErrorHandler, useClass: IonicErrorHandler}, Utils, ChartService, Storage]
 })
 export class AppModule {}

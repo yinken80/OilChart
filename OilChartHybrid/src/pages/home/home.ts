@@ -2,7 +2,7 @@ import { Component, ViewChild} from '@angular/core';
 import {Http, Response} from '@angular/http';
 
 import { NavController, Range, LoadingController, Loading,
-  ModalController } from 'ionic-angular';
+  ModalController, Platform } from 'ionic-angular';
 import { Toast } from 'ionic-native';
 import { Utils } from '../../providers/utils';
 import { ChartService } from '../../providers/chart.service';
@@ -27,6 +27,7 @@ export class HomePage {
   @ViewChild('menu') menu:OptionsMenuPage;
   @ViewChild('info') info:InformationPage;
 
+  private titles:string[] = ["Avg. Brent & WTI Price Type", "West Texas Inter. (WTI) Price Type", "Brent Price Type"];
   private id: string = "chartdiv";
 
   private data: any;
@@ -34,6 +35,9 @@ export class HomePage {
   private graphs: any;
 
   private currentDate: string;
+  
+  private minDate:string;
+  private maxDate:string;
   
   private oilTypes: OilType[] = [];
 
@@ -44,16 +48,38 @@ export class HomePage {
   options: SelectOptions;
   savingPopup:Loading;
 
-  constructor(public navCtrl: NavController, private cs:ChartService, private utils:Utils,
+  constructor(platform:Platform, public navCtrl: NavController, private cs:ChartService, private utils:Utils,
     private loadingCtrl:LoadingController, private modalCtrl:ModalController) {
     this.currentDate = new Date().toISOString();
     let ids:string[] = ["0"];
+
     this.options = new SelectOptions();
 
-    this.cs.getOilTypes().then(oilTypes => {
+    platform.ready().then(() => {
+      this.cs.loadSelectOptions().then((value) => {
+        if (value) {
+          this.options = value;
+          this.loadChart();
+        } else {
+          this.loadOptions();
+        }
+      }).catch(error => {
+        this.loadOptions();
+      });
+    });
+  }
+
+  private loadOptions() {
+    this.loading = true;
+    this.options = new SelectOptions();
+    this.cs.getPredictionPeriod().then(result => {
+      if (result) {
+        let period = result[0];
+        this.options.dateRange = {lower:period.StartDate, upper:period.EndDate};
+        this.cs.getOilTypes().then(oilTypes => {
           this.options.oilTypes = oilTypes ? oilTypes:[];
           if (oilTypes && oilTypes.length > 0) {
-            this.options.oilType = oilTypes[0].id;
+            this.options.oilType = 0;
           }          
           this.cs.getForecasters().then(forecasters => {
             this.options.forecasters = forecasters ? forecasters:[];
@@ -61,8 +87,14 @@ export class HomePage {
           }).catch(error => {
             this.loading = false;
           });
+        }).catch(error => {
+              this.loading = false;
+        });
+      } else {
+        this.loading = false;
+      } 
     }).catch(error => {
-          this.loading = false;
+      this.loading = false;
     });
   }
 
@@ -96,41 +128,49 @@ export class HomePage {
       if (forecaster.checked)
         ids.push(forecaster.id);
     });
-    let startDate = new Date('2015-01-01').toISOString();
-    let endDate = new Date().toISOString();
+
+    this.cs.setSelectOptions(this.options);
+    let oilType = this.options.oilTypes[this.options.oilType].id;
        
-    this.cs.getChartData(ids, this.options.oilType, startDate, endDate).then(this.parseChartData.bind(this))
-    .catch(error=> {
-      this.loading = false;
-      this.chart = null;
-      alert(error);
-    });
+    this.cs.getChartData(ids, oilType, this.options.dateRange.lower, this.options.dateRange.upper)
+      .then(this.parseChartData.bind(this))
+      .catch(error=> {
+        this.loading = false;
+        this.chart = null;
+        alert(error);
+      });
   }
 
   resetChart() {
     this.loading = true;
     if (this.options.oilTypes && this.options.oilTypes.length > 0) {
-      this.options.oilType = this.options.oilTypes[0].id;
+      this.options.oilType = 0;
     }    
     this.options.forecasters.forEach((forecaster, index)=>{
       forecaster.checked = false;
       if (index == 0)
         forecaster.checked = true;
     });
-    let startDate = new Date('2015-01-01').toISOString();
-    let endDate = new Date().toISOString();
+
+    this.cs.setSelectOptions(this.options);
 
     let ids = [];
     if (this.options.forecasters && this.options.forecasters.length > 0) {
       ids.push(this.options.forecasters[0].id);
     }
 
-    this.cs.getChartData(ids, this.options.oilType, startDate, endDate).then(this.parseChartData.bind(this))
-    .catch(error=> {
-      this.loading = false;
-      this.chart = null;
-      alert(error);
-    });
+    let startDate = this.options.dateRange.lower;
+    let endDate = this.options.dateRange.upper;
+
+    let oilType = this.options.oilTypes[this.options.oilType].id;
+
+    this.cs.getChartData(ids, oilType, startDate, endDate)
+      .then(this.parseChartData.bind(this))
+      .catch(error=> {
+        this.loading = false;
+        this.chart = null;
+        alert(error);
+      });
   }
 
   parseChartData(value) {
@@ -227,7 +267,7 @@ export class HomePage {
           size: 15
         },
         {
-          text: "Avg. Brent & WTI Price Type",
+          text: this.titles[this.options.oilType],
           size: 10
         }
       ],

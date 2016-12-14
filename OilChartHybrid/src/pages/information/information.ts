@@ -18,8 +18,8 @@ import { ViewController, NavParams } from 'ionic-angular';
                 opacity: 0,
                 transform: 'translateX(100%)'
             })),
-            transition('shown => hidden', animate('0.2s linear')),
-            transition('hidden => shown', animate('0.2s linear'))
+            transition('shown => hidden', animate('0.3s linear')),
+            transition('hidden => shown', animate('0.3s linear'))
         ])
     ],
   templateUrl: 'information.html'

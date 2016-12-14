@@ -3,8 +3,8 @@
     <div class="container">
       <div class="title"><b>Oil Market Price:</b></div>
       <div class="content">
-        <ion-select class="full-width" [(ngModel)]="options.oilType">
-          <ion-option *ngFor="let type of options.oilTypes;let i = index;" [value]="type.id">{{type.name}}</ion-option>
+        <ion-select class="full-width" [(ngModel)]="options.oilType" (ionChange)="onChangeOilType()">
+          <ion-option *ngFor="let type of options.oilTypes;let i = index;" [value]="i">{{type.name}}</ion-option>
         </ion-select>
       </div>
     </div>

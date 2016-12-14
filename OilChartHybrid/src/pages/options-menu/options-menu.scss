@@ -3,7 +3,10 @@ page-options-menu {
 
     .main {
         height: 100%;
-        background-color: #f06b33;
+        background-image: url('../assets/img/menu_background.png');
+        background-position: 50% 50%;
+        background-repeat: no-repeat;
+        background-size: cover;
     }
 
     #mainMenuContent {

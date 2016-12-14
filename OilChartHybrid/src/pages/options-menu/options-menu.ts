@@ -19,8 +19,8 @@ import { SelectOptions, ActionTypes } from '../../models';
                 opacity: 0,
                 transform: 'translateX(-100%)'
             })),
-            transition('shown => hidden', animate('0.2s linear')),
-            transition('hidden => shown', animate('0.2s linear'))
+            transition('shown => hidden', animate('0.3s linear')),
+            transition('hidden => shown', animate('0.3s linear'))
         ])
     ],
   templateUrl: 'options-menu.html'
@@ -38,6 +38,11 @@ export class OptionsMenuPage {
 
   ionViewDidLoad() {
     
+  }
+
+  onChangeOilType() {
+    this.view.emit({options:this.options});
+    this.toggleVisibility();
   }
 
   onReset() {
