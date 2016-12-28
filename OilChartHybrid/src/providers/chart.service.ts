@@ -55,9 +55,10 @@ export class ChartService {
     /**
      * This function is to get data of graphs and dataProvider for chart.
      */
-    public getChartData(ids:string[], oilType:string, startDate:string, endDate:string) {
+    public getChartData(ids:string[], oilType:string, startDate:string, endDate:string, isNYMEX:boolean) {
+        let includeNYMEX = isNYMEX?1:0;
         let url = `${this.GetChartData_Url}?id=${ids.join(",")}`
-                        +`&oiltype=${oilType}&startdate=${startDate}&enddate=${endDate}`;
+                        +`&oiltype=${oilType}&startdate=${startDate}&enddate=${endDate}&isNYMEX=${includeNYMEX}`;
         return this.get(url);
     }
 

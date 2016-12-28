@@ -1,9 +1,9 @@
 import { Component, ViewChild} from '@angular/core';
-import {Http, Response} from '@angular/http';
+import { Http, Response } from '@angular/http';
 
 import { NavController, Range, LoadingController, Loading,
   ModalController, Platform } from 'ionic-angular';
-import { Toast } from 'ionic-native';
+import { Toast, Network } from 'ionic-native';
 import { Utils } from '../../providers/utils';
 import { ChartService } from '../../providers/chart.service';
 import { IForeCaster, ForeCaster,
@@ -44,6 +44,8 @@ export class HomePage {
   chart: {[key:string]:any} = null;
 
   loading: boolean = true;
+  hasNetwork: boolean = true;
+  hasLoaded:boolean = false;
 
   options: SelectOptions;
   savingPopup:Loading;
@@ -59,17 +61,39 @@ export class HomePage {
       this.cs.loadSelectOptions().then((value) => {
         if (value) {
           this.options = value;
-          this.loadChart();
+          this.cs.getPredictionPeriod().then(result => {
+            if (result) {
+              let period = result[0];
+              this.options.dateRange = {lower:period.StartDate, upper:period.EndDate};
+            }
+            this.loadChart();
+          }).catch(error => {
+            this.loadChart();
+          });          
         } else {
           this.loadOptions();
         }
       }).catch(error => {
         this.loadOptions();
       });
+      
+      Network.onConnect().subscribe(() => {
+        this.hasNetwork = true;
+        if (!this.hasLoaded) {
+          this.loadOptions();
+        }
+      });
+
+      Network.onDisconnect().subscribe(() => {
+        this.hasNetwork = false;
+      });
     });
   }
 
   private loadOptions() {
+    if (!this.hasNetwork) {
+      alert("No internet connection.");
+    }
     this.loading = true;
     this.options = new SelectOptions();
     this.cs.getPredictionPeriod().then(result => {
@@ -122,6 +146,9 @@ export class HomePage {
   }
 
   loadChart() {
+    if (!this.hasNetwork) {
+      alert("No internet connection.");
+    }
     this.loading = true;
     let ids:string[]=[];
     this.options.forecasters.forEach(forecaster => {
@@ -132,7 +159,7 @@ export class HomePage {
     this.cs.setSelectOptions(this.options);
     let oilType = this.options.oilTypes[this.options.oilType].id;
        
-    this.cs.getChartData(ids, oilType, this.options.dateRange.lower, this.options.dateRange.upper)
+    this.cs.getChartData(ids, oilType, this.options.dateRange.lower, this.options.dateRange.upper, this.options.isNYMEX)
       .then(this.parseChartData.bind(this))
       .catch(error=> {
         this.loading = false;
@@ -142,6 +169,9 @@ export class HomePage {
   }
 
   resetChart() {
+    if (!this.hasNetwork) {
+      alert("No internet connection.");
+    }
     this.loading = true;
     if (this.options.oilTypes && this.options.oilTypes.length > 0) {
       this.options.oilType = 0;
@@ -151,6 +181,8 @@ export class HomePage {
       if (index == 0)
         forecaster.checked = true;
     });
+
+    this.options.isNYMEX = true;
 
     this.cs.setSelectOptions(this.options);
 
@@ -164,7 +196,7 @@ export class HomePage {
 
     let oilType = this.options.oilTypes[this.options.oilType].id;
 
-    this.cs.getChartData(ids, oilType, startDate, endDate)
+    this.cs.getChartData(ids, oilType, startDate, endDate, this.options.isNYMEX)
       .then(this.parseChartData.bind(this))
       .catch(error=> {
         this.loading = false;
@@ -184,6 +216,7 @@ export class HomePage {
       saveFs: this.saveDataToFile.bind(this)
     });
     this.loading = false;
+    this.hasLoaded = true;
   }
 
   onFinishLoad(e) {
@@ -253,6 +286,7 @@ export class HomePage {
 
   makeChart({ dataProvider, graphs, currentDate, listener, saveFs }: Configuration) {
     return {
+      tapToActivate: false,
       type: "serial",
       categoryField: "date",
       autoMarginOffset: 1,

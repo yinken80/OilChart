@@ -19,14 +19,15 @@
         </ion-list>
       </div>
     </div>
-    <!--<div class="container">
-      <div class="title"><b>Predictions Made Between:</b></div>
+    <div class="container">
+      <div class="title"><b>Include in Index Calculations:</b></div>
       <div class="content">
-        <ion-label id="dateRangeText">{{options.dateRange.lower | date:"EEE MMM dd yyyy"}} - {{options.dateRange.upper | date:"EEE MMM dd yyyy"}}</ion-label>
-        <ion-range name="dateRanger" (ionChange)="onChangeDate()" steps="86400" dualKnobs="true" [(ngModel)]="options.dateRange" [min]="minDate" [max]="maxDate" forControlName="dateRanger">
-        </ion-range>
+        <ion-item class="item-compact" no-lines>
+          <ion-label>NYMEX</ion-label>
+          <ion-checkbox [(ngModel)]="options.isNYMEX"></ion-checkbox>
+        </ion-item>
       </div>
-    </div>-->
+    </div>
     <ion-row>
       <ion-col width-50>
         <button ion-button id="reset" (click)="onReset()">Reset</button>

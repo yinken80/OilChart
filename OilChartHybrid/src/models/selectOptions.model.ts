@@ -10,6 +10,7 @@ export class SelectOptions {
     oilType: number;
     forecasters: ForeCaster[];
     dateRange: Range;
+    isNYMEX:boolean;
     constructor() {
         this.oilTypes = [];
         this.oilType = 0;
@@ -18,5 +19,6 @@ export class SelectOptions {
             lower: "1970-01-01",
             upper: "2020-12-12"
         };
+        this.isNYMEX = true;
     }
 }

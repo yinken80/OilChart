@@ -2,7 +2,10 @@ page-options-menu {
     height: 100%;
 
     .main {
+        position:absolute;
         height: 100%;
+        width: 100%;
+        overflow:scroll;
         background-image: url('../assets/img/menu_background.png');
         background-position: 50% 50%;
         background-repeat: no-repeat;

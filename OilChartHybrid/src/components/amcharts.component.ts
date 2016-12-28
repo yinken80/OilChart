@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, SimpleChanges, OnChanges } from "@angular/core";
+import { Component, ElementRef, Input, SimpleChanges, OnChanges, AfterViewInit } from "@angular/core";
 
 // TODO better type for this
 // TODO move this into a separate file ?
@@ -178,7 +178,7 @@ function updateChartObject(chart, oldObj, newObj) {
   selector: "amCharts",
   template: '<div></div>'
 })
-export class AmChartsComponent implements OnChanges{
+export class AmChartsComponent implements OnChanges, AfterViewInit{
   private el: any; // TODO better type for this
   private chart: any; // TODO better type for this
 
@@ -218,6 +218,12 @@ export class AmChartsComponent implements OnChanges{
   ngOnDestroy() {
     if (this.chart) {
       this.chart.clear();
+    }
+  }
+
+  ngAfterViewInit() {
+    if (this.chart) {
+      
     }
   }
 }
