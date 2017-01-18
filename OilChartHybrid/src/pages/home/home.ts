@@ -145,7 +145,7 @@ export class HomePage {
   onGoHomePage() {
     //this.navCtrl.push(WebsitePage);
     this.platform.ready().then(() => {
-      InAppBrowser.open('http://www.hartenergy.com', "_blank");
+      let browser = new InAppBrowser(encodeURI('http://www.hartenergy.com'), "_blank", "location=yes");
     });
   }
 
