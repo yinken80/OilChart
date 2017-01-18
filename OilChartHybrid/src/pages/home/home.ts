@@ -3,7 +3,7 @@ import { Http, Response } from '@angular/http';
 
 import { NavController, Range, LoadingController, Loading,
   ModalController, Platform } from 'ionic-angular';
-import { Toast, Network } from 'ionic-native';
+import { Toast, Network, InAppBrowser } from 'ionic-native';
 import { Utils } from '../../providers/utils';
 import { ChartService } from '../../providers/chart.service';
 import { IForeCaster, ForeCaster,
@@ -19,6 +19,7 @@ interface Configuration {
   listener: () => void;
   saveFs: any;
 }
+
 @Component({
   selector: 'page-home',
   templateUrl: 'home.html'
@@ -50,7 +51,7 @@ export class HomePage {
   options: SelectOptions;
   savingPopup:Loading;
 
-  constructor(platform:Platform, public navCtrl: NavController, private cs:ChartService, private utils:Utils,
+  constructor(private platform:Platform, public navCtrl: NavController, private cs:ChartService, private utils:Utils,
     private loadingCtrl:LoadingController, private modalCtrl:ModalController) {
     this.currentDate = new Date().toISOString();
     let ids:string[] = ["0"];
@@ -142,7 +143,10 @@ export class HomePage {
   }
 
   onGoHomePage() {
-    window.open("http://www.hartenergy.com", "_system");
+    //this.navCtrl.push(WebsitePage);
+    this.platform.ready().then(() => {
+      InAppBrowser.open('http://www.hartenergy.com', "_blank");
+    });
   }
 
   loadChart() {

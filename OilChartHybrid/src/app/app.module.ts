@@ -27,7 +27,7 @@ import { ChartService } from '../providers/chart.service';
     MyApp,
     HomePage,
     OptionsMenuPage,
-    InformationPage
+    InformationPage,
   ],
   providers: [{provide: ErrorHandler, useClass: IonicErrorHandler}, Utils, ChartService, Storage]
 })
